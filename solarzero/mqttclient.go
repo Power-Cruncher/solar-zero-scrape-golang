@@ -163,6 +163,11 @@ func (mq *mqttClientImpl) WriteCurrentData(scrape SolarZeroScrape) {
 	// mq.publish("solar/value1", formatInt(currentData.Monitor.Solar.Value1.Value))
 	// mq.publish("solar/value2", formatInt(currentData.Monitor.Solar.Value2.Value))
 
+	//HW Statistics
+	mq.publish("total/hotwater-total", formatFloat(currentData.Hotwater.Total))
+	mq.publish("current/hotwater-load", formatFloat(currentData.Hotwater.Wattage))
+	mq.publish("current/hotwater-volts", formatFloatN(currentData.Hotwater.Voltage))
+
 	mq.publish("total/home-usage", formatInt(currentData.Cards.HomeUsage.Value))
 	mq.publish("total/solar-utilization", formatInt(currentData.Cards.SolarUtilization.Value))
 	mq.publish("total/home-usage-total", formatFloat(currentData.Cards.HomeUsageTotal.Value))
@@ -422,5 +427,9 @@ func (mq *mqttClientImpl) PublishHomeAssistantDiscovery() {
 	mq.publishDiscovery("flows", "gridtobattery", "Grid To Battery", "Wh", "energy", "measurement", "mdi:transmission-tower-import")
 
 	// mq.publishDiscovery("carbon", "value", "Carbon Usage", "ppm", "co2", "measurement", "mdi:molecule-co2")
+	//HW Statistics	mdiHeatingCoil
+	mq.publishDiscoveryLastResetMidnight("total", "hotwater-total", "HW Usage Total", "Wh", "energy", "total", "mdi:water-thermometer")
+	mq.publishDiscovery("current", "hotwater-load", "HW Load", "W", "power", "measurement", "mdi:water-thermometer")
+	mq.publishDiscovery("current", "hotwater-volts", "Voltage", "V", "voltage", "measurement", "mdi:speedometer")
 
 }
