@@ -129,7 +129,7 @@ func (szs *SolarZeroScrapeImpl) Start() {
 		}
 	})
 
-	s.Every(1).Days().Do(func() {
+	s.Every(5).Minutes().Do(func() {
 		Logger.Info().Msgf("Get daily @ %s", time.Now().String())
 		err := szs.getDaily()
 		if err != nil {
@@ -373,6 +373,7 @@ func (szs *SolarZeroScrapeImpl) getDaily() error {
 	dailyRequestData.HasTou = true
 	dailyRequestData.Timezone = "Pacific/Auckland"
 	dailyRequestData.SiteID = szs.customerData.Account.SiteID
+	dailyRequestData.Date = time.Now().Format(time.RFC3339)
 	bytes, _ := dailyRequestData.Marshal()
 
 	var err error

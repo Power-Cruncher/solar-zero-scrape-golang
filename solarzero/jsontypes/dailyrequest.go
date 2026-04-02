@@ -22,4 +22,5 @@ type DailyRequestData struct {
 	SiteID   string `json:"siteId"`
 	Timezone string `json:"timezone"`
 	HasTou   bool   `json:"hasTou"`
+	Date     string `json:"date"`
 }

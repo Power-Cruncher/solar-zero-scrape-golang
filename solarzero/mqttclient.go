@@ -109,6 +109,7 @@ func formatInt(value int64) string {
 func (mq *mqttClientImpl) WriteCurrentData(scrape SolarZeroScrape) {
 	Logger.Debug().Msgf("Write to mqtt Current %s", fmt.Sprint(time.Now()))
 	currentData := scrape.Data()
+	dailyData := scrape.Daily()
 
 	mq.publish("current/received", fmt.Sprint(time.Unix(0, currentData.EnergyFlow.LastUpdate*int64(time.Millisecond))))
 
@@ -135,6 +136,9 @@ func (mq *mqttClientImpl) WriteCurrentData(scrape SolarZeroScrape) {
 		mq.publish("current/battery-charge", formatFloat(0.0))
 		mq.publish("current/battery-use", formatFloat(0.0))
 	}
+	//not sure if this will be daily or monthly total kWh battery discharged/charged
+	mq.publish("total/daily-battery-discharged", formatFloat(dailyData.Reports[0].Battery.Total))
+	mq.publish("total/daily-battery-charged", formatFloat(dailyData.Reports[0].Battery.Total2))
 
 	mq.publish("current/grid-import", strconv.FormatBool(currentData.EnergyFlow.GridImport))
 	mq.publish("current/grid-export", strconv.FormatBool(currentData.EnergyFlow.GridExport))
@@ -396,8 +400,10 @@ func (mq *mqttClientImpl) PublishHomeAssistantDiscovery() {
 	mq.publishDiscovery("current", "import", "Grid Import", "W", "power", "measurement", "mdi:home-import-outline")
 	mq.publishDiscovery("current", "export", "Grid Export", "W", "power", "measurement", "mdi:home-export-outline")
 
-	mq.publishDiscoveryLastResetMidnight("current", "battery-use", "Battery Use", "Wh", "energy", "total", "mdi:battery-arrow-down")
-	mq.publishDiscoveryLastResetMidnight("current", "battery-charge", "Battery Charge", "Wh", "energy", "total", "mdi:battery-charging-80")
+	mq.publishDiscovery("current", "battery-use", "Battery Use", "W", "power", "total", "mdi:battery-arrow-down")
+	mq.publishDiscovery("current", "battery-charge", "Battery Charge", "W", "power", "total", "mdi:battery-charging-80")
+	mq.publishDiscoveryLastResetMidnight("total", "home-usage-total", "Home Usage Total", "Wh", "energy", "total", "mdi:home-lightning-bolt")
+	mq.publishDiscoveryLastResetMidnight("total", "home-usage-total", "Home Usage Total", "Wh", "energy", "total", "mdi:home-lightning-bolt")
 
 	mq.publishDiscovery("total", "home-usage", "Home Usage", "%", "energy", "measurement", "mdi:home-lightning-bolt-outline")
 	mq.publishDiscovery("total", "solar-utilization", "Solar Utilization", "%", "energy", "measurement", "mdi:solar-power")
@@ -432,4 +438,6 @@ func (mq *mqttClientImpl) PublishHomeAssistantDiscovery() {
 	mq.publishDiscovery("current", "hotwater-load", "HW Load", "W", "power", "measurement", "mdi:water-thermometer")
 	mq.publishDiscovery("current", "hotwater-volts", "Voltage", "V", "voltage", "measurement", "mdi:speedometer")
 
+	mq.publishDiscoveryLastResetMidnight("total", "daily-battery-discharged", "Battery Discharge Total", "Wh", "energy", "total", "mdi:battery-arrow-down-outline")
+	mq.publishDiscoveryLastResetMidnight("total", "daily-battery-charged", "Battery Charge Total", "Wh", "energy", "total", "mdi:battery-arrow-up")
 }
